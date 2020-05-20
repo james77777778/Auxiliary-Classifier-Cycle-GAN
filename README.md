@@ -10,3 +10,8 @@ In this project, I combine the CycleGAN with ACGAN concept that I modified the d
 chmod +x run.sh
 ./run.sh
 ```
+
+## Tensorboard
+```bash
+tensorboard --logdir logs
+```
