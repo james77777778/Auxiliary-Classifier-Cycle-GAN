@@ -83,15 +83,10 @@ class ResnetBlock(nn.Module):
         else:
             raise NotImplementedError(
                 'padding [%s] is not implemented' % padding_type)
-        if norm_layer is None:
-            conv_block += [nn.Conv2d(dim, dim, kernel_size=3, padding=p,
-                                     bias=use_bias),
-                           nn.ReLU(True)]
-        else:
-            conv_block += [nn.Conv2d(dim, dim, kernel_size=3, padding=p,
-                                     bias=use_bias),
-                           norm_layer(dim),
-                           nn.ReLU(True)]
+        conv_block += [nn.Conv2d(dim, dim, kernel_size=3, padding=p,
+                                 bias=use_bias),
+                       norm_layer(dim),
+                       nn.ReLU(True)]
         if use_dropout:
             conv_block += [nn.Dropout(0.5)]
 
@@ -111,8 +106,7 @@ class ResnetBlock(nn.Module):
         else:
             conv_block += [nn.Conv2d(dim, dim, kernel_size=3, padding=p,
                                      bias=use_bias),
-                           norm_layer(dim),
-                           ]
+                           norm_layer(dim)]
 
         return nn.Sequential(*conv_block)
 
@@ -160,7 +154,7 @@ class ResnetGenerator(nn.Module):
             mult = 2 ** i
             model += [nn.Conv2d(ngf * mult, ngf * mult * 2, kernel_size=3,
                                 stride=2, padding=1, bias=use_bias),
-                      # norm_layer(ngf * mult * 2),
+                      norm_layer(ngf * mult * 2),
                       nn.ReLU(True)]
 
         mult = 2 ** n_downsampling
@@ -311,9 +305,9 @@ class CycleGAN(nn.Module):
     def __init__(self):
         super(CycleGAN, self).__init__()
         self.netG_A = ResnetGenerator(3, 3, 64, norm_layer=nn.InstanceNorm2d,
-                                      use_dropout=True, n_blocks=6)
+                                      use_dropout=False, n_blocks=6)
         self.netG_B = ResnetGenerator(3, 3, 64, norm_layer=nn.InstanceNorm2d,
-                                      use_dropout=True, n_blocks=6)
+                                      use_dropout=False, n_blocks=6)
         self.netD_A = NLayerDiscriminator(3, 64, n_layers=3,
                                           norm_layer=nn.InstanceNorm2d)
         self.netD_B = NLayerDiscriminator(3, 64, n_layers=3,
@@ -344,9 +338,9 @@ class ACCycleGAN(nn.Module):
     def __init__(self):
         super(ACCycleGAN, self).__init__()
         self.netG_A = ResnetGenerator(3, 3, 64, norm_layer=nn.InstanceNorm2d,
-                                      use_dropout=True, n_blocks=6)
+                                      use_dropout=False, n_blocks=6)
         self.netG_B = ResnetGenerator(3, 3, 64, norm_layer=nn.InstanceNorm2d,
-                                      use_dropout=True, n_blocks=6)
+                                      use_dropout=False, n_blocks=6)
         self.netD_A = ACDiscriminator(3, 64, n_layers=3,
                                       norm_layer=nn.InstanceNorm2d)
         self.netD_B = ACDiscriminator(3, 64, n_layers=3,

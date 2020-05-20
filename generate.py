@@ -38,7 +38,7 @@ def main(agrv):
         model = ACCycleGAN().to(device)
     model_weights = torch.load(FLAGS.model_weight)
     model.load_state_dict(model_weights['model'])
-    model.eval()
+    model.train()
 
     # get data and do the inference
     for batch in train_loader:

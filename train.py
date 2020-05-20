@@ -21,7 +21,7 @@ from src.utils.utils import dict2table, set_seed
 FLAGS = flags.FLAGS
 # train steps
 flags.DEFINE_integer('epochs', 200, "total number of training epochs")
-flags.DEFINE_integer('batch_size', 2, "number of batch size")
+flags.DEFINE_integer('batch_size', 1, "number of batch size")
 flags.DEFINE_integer('eval_step', 10, "number of epoch to evaluate")
 flags.DEFINE_integer('save_step', 50, "number of epoch to save model")
 # model type
@@ -29,10 +29,10 @@ flags.DEFINE_enum('model', 'cyclegan', ["cyclegan", "accyclegan"],
                   "model type")
 # training parameters
 flags.DEFINE_float('lr', 2e-4, "learning rate")
-flags.DEFINE_integer('image_size', 128, "image size for training")
+flags.DEFINE_integer('image_size', 256, "image size for training")
 flags.DEFINE_float('lambda_A', 10.0, "weight of G_A")
 flags.DEFINE_float('lambda_B', 10.0, "weight of G_B")
-flags.DEFINE_float('lambda_idt', 0.5, "weight of identity loss")
+flags.DEFINE_float('lambda_idt', 0.1, "weight of identity loss")
 # loss type
 flags.DEFINE_string('loss', 'L1', "loss type for CycleGAN")
 # dataset
@@ -202,7 +202,7 @@ class CycleGANTrainer(object):
                 "loss_D_B": loss_D_B.item()}
 
     def evaluate(self, batch):
-        self.model.eval()
+        self.model.train()
         device = self.device
         real_A, real_B = batch["A"].to(device), batch["B"].to(device)
         c_A, c_B = batch["class_A"].to(device), batch["class_B"].to(device)
@@ -321,14 +321,15 @@ class CycleGANTrainer(object):
                     total_loss_G += test_loss["loss_G"]
                     total_loss_D_A += test_loss["loss_D_A"]
                     total_loss_D_B += test_loss["loss_D_B"]
-                    res = test_loss["res"]
-                    images = torch.cat((
-                        batch["A"][:10].to(device), res["fake_B"][:10],
-                        batch["B"][:10].to(device), res["fake_A"][:10]))
-                    # denormalize
-                    images = self.test_dataset.denormalize(images)
-                    grid = torchvision.utils.make_grid(images)
-                    self.writer.add_image("idx_{}".format(i), grid, iters)
+                    if i < 5:
+                        res = test_loss["res"]
+                        images = torch.cat((
+                            batch["A"].to(device), res["fake_B"],
+                            batch["B"].to(device), res["fake_A"]))
+                        # denormalize
+                        images = self.test_dataset.denormalize(images)
+                        grid = torchvision.utils.make_grid(images)
+                        self.writer.add_image("idx_{}".format(i), grid, iters)
                 avg_loss_G = total_loss_G/len(self.test_loader.dataset)
                 avg_loss_D_A = total_loss_D_A/len(self.test_loader.dataset)
                 avg_loss_D_B = total_loss_D_B/len(self.test_loader.dataset)
