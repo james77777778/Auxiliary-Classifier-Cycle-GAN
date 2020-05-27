@@ -2,6 +2,13 @@
 ## Intro
 In this project, I combine the CycleGAN with ACGAN concept that I modified the disciminator inside the CycleGAN.
 
+## Installation
+- Ubuntu 18.04
+- pytorch 1.4.0
+```bash
+pip install -r requirements.txt
+```
+
 ## Result
 ![](doc/imgs/1.png)
 
